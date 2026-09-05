@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StayType AI — NYC Airbnb Room Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="bg-fx">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="app">
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 9V22H21V9L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M9 22V13H15V22" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">RoomType <b>AI</b></span>
+          <span class="brand-sub">NYC Airbnb Room-Type Predictor</span>
+        </div>
+      </div>
+
+      <div class="status-pill" id="apiStatus">
+        <span class="dot" id="apiDot"></span>
+        <span id="apiStatusText">Checking API…</span>
+      </div>
+    </header>
+
+    <main class="layout">
+
+      <!-- FORM PANEL -->
+      <section class="panel form-panel">
+        <div class="panel-head">
+          <h1>Predict the room type</h1>
+          <p>Fill in a listing's details and let the model classify it as an entire home, a private room, or a shared room.</p>
+        </div>
+
+        <form id="predictForm" novalidate>
+
+          <div class="field-group">
+            <div class="group-title">
+              <span class="group-icon">📍</span> Location
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="latitude">Latitude</label>
+                <input type="number" step="any" id="latitude" name="latitude" min="-90" max="90" placeholder="e.g. 40.7128" required />
+                <span class="hint">Between -90 and 90</span>
+                <span class="error" data-for="latitude"></span>
+              </div>
+              <div class="field">
+                <label for="longitude">Longitude</label>
+                <input type="number" step="any" id="longitude" name="longitude" min="-180" max="180" placeholder="e.g. -73.9352" required />
+                <span class="hint">Between -180 and 180</span>
+                <span class="error" data-for="longitude"></span>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="neighbourhood_group">Borough</label>
+                <select id="neighbourhood_group" name="neighbourhood_group" required>
+                  <option value="" disabled selected>Select a borough…</option>
+                </select>
+                <span class="error" data-for="neighbourhood_group"></span>
+              </div>
+              <div class="field">
+                <label for="neighbourhood">Neighbourhood</label>
+                <select id="neighbourhood" name="neighbourhood" required disabled>
+                  <option value="" disabled selected>Select a borough first…</option>
+                </select>
+                <span class="error" data-for="neighbourhood"></span>
+              </div>
+            </div>
+
+            <button type="button" class="mini-btn" id="useMyLocation">
+              <span>🧭</span> Use a sample NYC location
+            </button>
+          </div>
+
+          <div class="field-group">
+            <div class="group-title">
+              <span class="group-icon">💵</span> Pricing &amp; Stay
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="price">Price per night ($)</label>
+                <input type="number" step="any" id="price" name="price" min="0" placeholder="e.g. 150" required />
+                <span class="error" data-for="price"></span>
+              </div>
+              <div class="field">
+                <label for="minimum_nights">Minimum nights</label>
+                <input type="number" step="1" id="minimum_nights" name="minimum_nights" min="1" max="365" placeholder="e.g. 3" required />
+                <span class="hint">1 – 365</span>
+                <span class="error" data-for="minimum_nights"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="group-title">
+              <span class="group-icon">⭐</span> Reviews &amp; Activity
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="number_of_reviews">Total reviews</label>
+                <input type="number" step="1" id="number_of_reviews" name="number_of_reviews" min="0" placeholder="e.g. 24" required />
+                <span class="error" data-for="number_of_reviews"></span>
+              </div>
+              <div class="field">
+                <label for="reviews_per_month">Reviews / month</label>
+                <input type="number" step="any" id="reviews_per_month" name="reviews_per_month" min="0" placeholder="e.g. 1.4" required />
+                <span class="error" data-for="reviews_per_month"></span>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field">
+                <label for="calculated_host_listings_count">Host's total listings</label>
+                <input type="number" step="1" id="calculated_host_listings_count" name="calculated_host_listings_count" min="0" placeholder="e.g. 1" required />
+                <span class="error" data-for="calculated_host_listings_count"></span>
+              </div>
+              <div class="field">
+                <label for="availability_365">Availability (days/yr)</label>
+                <input type="number" step="1" id="availability_365" name="availability_365" min="0" max="365" placeholder="e.g. 200" required />
+                <span class="hint">0 – 365</span>
+                <span class="error" data-for="availability_365"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="submitBtn">
+              <span class="btn-label">Predict Room Type</span>
+              <span class="btn-loader" hidden>
+                <svg viewBox="0 0 24 24" class="spinner"><circle cx="12" cy="12" r="9" fill="none" stroke-width="3"/></svg>
+              </span>
+            </button>
+            <button type="button" class="btn-ghost" id="resetBtn">Reset</button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- RESULT PANEL -->
+      <section class="panel result-panel">
+        <div class="result-empty" id="resultEmpty">
+          <div class="empty-illustration">
+            <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+              <rect x="30" y="70" width="140" height="70" rx="6" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+              <path d="M20 75 L100 20 L180 75" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+              <rect x="90" y="95" width="20" height="45" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+              <circle cx="60" cy="105" r="8" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+              <circle cx="140" cy="105" r="8" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>
+            </svg>
+          </div>
+          <h3>No prediction yet</h3>
+          <p>Complete the form and hit <b>Predict Room Type</b> to see the model's call, confidence breakdown, and reasoning cues.</p>
+        </div>
+
+        <div class="result-content" id="resultContent" hidden>
+
+          <div class="result-badge" id="resultBadge">
+            <div class="badge-icon" id="badgeIcon">🏠</div>
+            <div class="badge-text">
+              <span class="badge-label">Predicted Room Type</span>
+              <span class="badge-value" id="badgeValue">—</span>
+            </div>
+          </div>
+
+          <div class="confidence-block">
+            <div class="confidence-head">
+              <span>Confidence Breakdown</span>
+            </div>
+            <div id="probBars" class="prob-bars"></div>
+          </div>
+
+          <div class="summary-block">
+            <div class="summary-row">
+              <span class="summary-label">Location</span>
+              <span class="summary-value" id="sumLocation">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Price / night</span>
+              <span class="summary-value" id="sumPrice">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Reviews</span>
+              <span class="summary-value" id="sumReviews">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Availability</span>
+              <span class="summary-value" id="sumAvailability">—</span>
+            </div>
+          </div>
+
+          <button class="btn-ghost btn-full" id="predictAgainBtn">Run Another Prediction</button>
+        </div>
+
+        <div class="result-error" id="resultError" hidden>
+          <div class="error-icon">⚠️</div>
+          <h3>Something went wrong</h3>
+          <p id="resultErrorMsg">Could not reach the prediction API.</p>
+          <button class="btn-ghost" id="retryBtn">Try Again</button>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <span>Powered by a scikit-learn Random Forest pipeline served with FastAPI</span>
+      <div class="api-config">
+        <label for="apiBaseInput">API URL</label>
+        <input type="text" id="apiBaseInput" placeholder="http://127.0.0.1:8000" />
+        <button id="saveApiBase" class="mini-btn">Save</button>
+      </div>
+    </footer>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
