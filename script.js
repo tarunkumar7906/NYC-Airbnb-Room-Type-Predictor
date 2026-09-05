@@ -3,7 +3,7 @@
 // ==========================================================================
 
 // ---- Config -----------------------------------------------------------
-const DEFAULT_API_BASE = "http://127.0.0.1:8000";
+const DEFAULT_API_BASE = "https://nyc-airbnb-room-type-predictor-706e.onrender.com";
 const API_BASE_KEY = "staytype_api_base";
 
 function getApiBase() {
